@@ -1,41 +1,20 @@
 pipeline {
-    agent any
-
-    tools {
-        python 'Python3'  // Make sure it's defined in Jenkins tools
-    }
-
-    environment {
-        SONARQUBE = 'MySonar'  // Must match the name you gave in Jenkins
+    agent {
+        docker { image 'python:3.10' }
     }
 
     stages {
-        stage('Clone Repository') {
-            steps {
-                git url: 'https://github.com/Ress-0722/flask-devops-pipeline.git'
-            }
-        }
-
         stage('Install Dependencies') {
             steps {
                 sh 'pip install -r requirements.txt'
             }
         }
 
-        stage('SonarQube Analysis') {
+        stage('Run Application') {
             steps {
-                withSonarQubeEnv("${SONARQUBE}") {
-                    sh 'sonar-scanner'
-                }
-            }
-        }
-
-        stage('Quality Gate') {
-            steps {
-                timeout(time: 1, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
+                sh 'python app.py'
             }
         }
     }
 }
+
